@@ -1,38 +1,23 @@
 services:
-  sender:
-    build: ./sender
-    container_name: sender
-    depends_on:
-      - rabbit
-    networks:
-      - rabbitmq-net
+  rabbit:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    ports: ["5672:5672", "15672:15672"]
+    environment:
+      RABBITMQ_DEFAULT_USER: gabriel
+      RABBITMQ_DEFAULT_PASS: insaid33
+    networks: [rabbitmq-net]
     restart: unless-stopped
 
   receiver:
     build: ./receiver
     container_name: receiver
-    depends_on:
-      - rabbit
-    networks:
-      - rabbitmq-net
-    restart: unless-stopped
+    depends_on: [rabbit]
+    networks: [rabbitmq-net]
 
-  rabbit:
-    image: rabbitmq:4-management
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: gabriel
-      RABBITMQ_DEFAULT_PASS: insaid33
-    networks:
-      - rabbitmq-net
-    restart: unless-stopped
-
-networks:
-  rabbitmq-net:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 192.168.20.0/24
+  # El sender lo dejamos sin auto-start para lanzarlo como TÚ quieras:
+  sender:
+    build: ./sender
+    networks: [rabbitmq-net]
+    tty: true            # <-- indispensable p/ consola viva
+    stdin_open: true     # <-- habilita tu teclado
