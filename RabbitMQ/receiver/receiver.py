@@ -1,5 +1,6 @@
 import pika
 import time
+import sys; sys.stdout.reconfigure(line_buffering=True)
 
 parameters = pika.ConnectionParameters(
     'rabbitmq', 5672, '/', pika.PlainCredentials('gabriel', 'insaid33')
