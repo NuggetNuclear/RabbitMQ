@@ -1,36 +1,58 @@
-import pika
-import time
+# sender_cli.py
+import pika, sys, time, argparse
 
-parameters = pika.ConnectionParameters(
-    'rabbitmq', 5672, '/', pika.PlainCredentials('gabriel', 'insaid33')
+parser = argparse.ArgumentParser(
+    description="CLI sender pa' Rabbit – full control de frecuencia y mensaje"
 )
+parser.add_argument("--freq", "-f", type=float, default=1.0,
+                    help="Segundos entre mensajes (default 1.0)")
+parser.add_argument("--msg", "-m", default="Hello",
+                    help="Texto base del mensaje (default 'Hello')")
+parser.add_argument("--interactive", "-i", action="store_true",
+                    help="Modo interactivo: leyéndote línea a línea de stdin")
+args = parser.parse_args()
 
-# 💥 Intentar conectar con retry (máximo 20 intentos, espera 3s entre cada uno)
+# –– 20 intentos de conexión, 3 s c/u (ya estaba en tu script original) –– :contentReference[oaicite:0]{index=0}
+params = pika.ConnectionParameters(
+    "rabbitmq", 5672, "/", pika.PlainCredentials("gabriel", "insaid33")
+)
 for i in range(20):
     try:
-        connection = pika.BlockingConnection(parameters)
+        conn = pika.BlockingConnection(params)
         break
     except pika.exceptions.AMQPConnectionError:
-        print(f"[WAIT] RabbitMQ not ready yet, retrying in 3s... ({i+1}/20)")
+        print(f"[WAIT] RabbitMQ no ready, retry {i+1}/20…", flush=True)
         time.sleep(3)
 else:
-    raise Exception("No se pudo conectar a RabbitMQ luego de 20 intentos :(")
+    sys.exit("😭 No se pudo conectar luego de 20 reintentos")
 
-channel = connection.channel()
-channel.queue_declare(queue='holas')
+ch = conn.channel()
+ch.queue_declare(queue="holas", durable=True)
 
-msg_n = 1
-while True:
-    body = f"Hello ({msg_n})"
-    channel.basic_publish(
-        exchange='',
-        routing_key='holas',
-        body=body,
-        properties=pika.BasicProperties(
-            delivery_mode=2,  # mensaje persistente
-            timestamp=int(time.time())
-        )
+def send(body):
+    ch.basic_publish(
+        exchange="",
+        routing_key="holas",
+        body=body.encode(),
+        properties=pika.BasicProperties(delivery_mode=2),
     )
-    print(f"[SENDER] Sent: {body}")
-    msg_n += 1
-    time.sleep(0.8)
+    print(f"[SENDER] Sent: {body}", flush=True)
+
+if args.interactive:
+    print("🔮 Type & Enter (Ctrl-D = exit)")
+    for line in sys.stdin:
+        txt = line.rstrip("\n")
+        if txt:
+            send(txt)
+else:
+    n = 1
+    try:
+        while True:
+            send(f"{args.msg} ({n})")
+            n += 1
+            time.sleep(args.freq)
+    except KeyboardInterrupt:
+        pass
+
+conn.close()
+print("👋 Bye !")
