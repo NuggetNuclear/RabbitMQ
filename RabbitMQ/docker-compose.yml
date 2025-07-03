@@ -1,0 +1,36 @@
+services:
+  sender:
+    build: ./sender
+    container_name: sender
+    depends_on:
+      - rabbit
+    networks:
+      - rabbitmq-net
+
+  receiver:
+    build: ./receiver
+    container_name: receiver
+    depends_on:
+      - rabbit
+    networks:
+      - rabbitmq-net
+
+  rabbit:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: gabriel
+      RABBITMQ_DEFAULT_PASS: insaid33
+    networks:
+      - rabbitmq-net
+    restart: unless-stopped
+
+networks:
+  rabbitmq-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.20.0/24
