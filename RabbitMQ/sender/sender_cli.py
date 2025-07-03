@@ -27,7 +27,7 @@ else:
     sys.exit("😭 No se pudo conectar luego de 20 reintentos")
 
 ch = conn.channel()
-ch.queue_declare(queue="holas", durable=True)
+ch.queue_declare(queue="holas", durable=False)
 
 def send(body):
     ch.basic_publish(
