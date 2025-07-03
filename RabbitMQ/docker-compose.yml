@@ -6,6 +6,7 @@ services:
       - rabbit
     networks:
       - rabbitmq-net
+    restart: unless-stopped
 
   receiver:
     build: ./receiver
@@ -14,6 +15,7 @@ services:
       - rabbit
     networks:
       - rabbitmq-net
+    restart: unless-stopped
 
   rabbit:
     image: rabbitmq:4-management
