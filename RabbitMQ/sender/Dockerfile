@@ -1,5 +1,6 @@
-FROM python:3.13-slim
+FROM python:3.12-slim
+ENV PYTHONUNBUFFERED=1          # no buffering ever
 WORKDIR /app
-COPY . .
+COPY sender_cli.py .
 RUN pip install pika
-CMD ["python", "sender.py"]
+ENTRYPOINT ["python", "-u", "sender_cli.py"]   # -u extra unbuffered
