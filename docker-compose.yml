@@ -6,8 +6,14 @@ services:
       - rabbit
     networks:
       - rabbitmq-net
-    tty: true            # <-- indispensable p/ consola viva
-    stdin_open: true     # <-- habilita tu teclado
+    tty: true
+    stdin_open: true
+    environment:
+      - BROKER_HOST=rabbitmq
+      - BROKER_PORT=5672
+      - BROKER_USER=gabriel
+      - BROKER_PASS=insaid33
+      - QUEUE=Cola_Mensajes
 
   receiver:
     build: ./receiver
@@ -17,6 +23,12 @@ services:
     networks:
       - rabbitmq-net
     restart: unless-stopped
+    environment:
+      - BROKER_HOST=rabbitmq
+      - BROKER_PORT=5672
+      - BROKER_USER=gabriel
+      - BROKER_PASS=insaid33
+      - QUEUE=Cola_Mensajes
 
   rabbit:
     image: rabbitmq:4-management
@@ -32,10 +44,9 @@ services:
     restart: unless-stopped
 
   sniffer:
-    build: ./scapy          # Carpeta donde pusiste tu sniffer.py y Dockerfile
+    build: ./scapy
     container_name: sniffer
-    networks:
-      - rabbitmq-net
+    network_mode: host
     volumes:
       - ./captures:/captures
     tty: true
