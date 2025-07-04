@@ -4,9 +4,9 @@ OUTPUT = "/captures/trace.pcap"
 
 # Lista interfaces disponibles
 interfaces = get_if_list()
-print("Interfaces detectadas en este contenedor:")
+print("Interfaces detectadas en este contenedor:", flush=True)
 for i, iface in enumerate(interfaces):
-    print(f"  [{i+1}] {iface}")
+    print(f"  [{i+1}] {iface}", flush=True)
 
 # Pregunta interfaz (nombre o número)
 input_str = input("\nElige la interfaz por nombre o número (ENTER para 'eth0'): ").strip()
@@ -18,8 +18,15 @@ else:
     IFACE = input_str
 
 FILTER = "tcp port 5672"
-print(f"\nSniffing interface: {IFACE} | filter: {FILTER}")
+print(f"\nSniffing interface: {IFACE} | filter: {FILTER}\n", flush=True)
 
-pkts = sniff(filter=FILTER, iface=IFACE, timeout=60)
-wrpcap(OUTPUT, pkts)
-print(f"Guardado {len(pkts)} paquetes en {OUTPUT}")
+captured_packets = []
+
+def print_and_store(pkt):
+    print(pkt.summary(), flush=True)
+    captured_packets.append(pkt)
+
+sniff(filter=FILTER, iface=IFACE, prn=print_and_store, timeout=60)
+
+wrpcap(OUTPUT, captured_packets)
+print(f"\nGuardado {len(captured_packets)} paquetes en {OUTPUT}", flush=True)
