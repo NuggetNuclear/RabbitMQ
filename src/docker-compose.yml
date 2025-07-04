@@ -6,7 +6,8 @@ services:
       - rabbit
     networks:
       - rabbitmq-net
-    restart: unless-stopped
+    tty: true            # <-- indispensable p/ consola viva
+    stdin_open: true     # <-- habilita tu teclado
 
   receiver:
     build: ./receiver

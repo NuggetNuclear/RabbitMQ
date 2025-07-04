@@ -1,23 +1,28 @@
 import pika
 import time
+import sys; sys.stdout.reconfigure(line_buffering=True)
 
 parameters = pika.ConnectionParameters(
     'rabbitmq', 5672, '/', pika.PlainCredentials('gabriel', 'insaid33')
 )
 
-# 💥 Intentar conectar con retry (máximo 20 intentos, espera 3s entre cada uno)
+# –– 20 intentos de conexión, 3 s c/u  ––
 for i in range(20):
     try:
         connection = pika.BlockingConnection(parameters)
         break
     except pika.exceptions.AMQPConnectionError:
-        print(f"[WAIT] RabbitMQ not ready yet, retrying in 3s... ({i+1}/20)")
+        print(f"[WAIT] RabbitMQ is not ready, retry {i+1}/20…")
         time.sleep(3)
 else:
-    raise Exception("No se pudo conectar a RabbitMQ luego de 20 intentos :(")
+    raise Exception("Couldn't connect to RabbitMQ after 20 attempts. Exiting.")
+
+print("[RECEIVER] Connected to RabbitMQ")
+print("[RECEIVER] Ready to receive messages...")
+print("[RECEIVER] Waiting for messages (Ctrl+C to exit)...")
 
 channel = connection.channel()
-channel.queue_declare(queue='holas')
+channel.queue_declare(queue='TheQueue', durable=False)
 
 def callback(ch, method, properties, body):
     print(f"[RECEIVER] Got: {body.decode()}")
@@ -27,7 +32,6 @@ def callback(ch, method, properties, body):
     print(f"  Properties: {properties}")
     print("")
 
-channel.basic_consume(queue='holas', on_message_callback=callback, auto_ack=True)
+channel.basic_consume(queue='TheQueue', on_message_callback=callback, auto_ack=True)
 
-print("[RECEIVER] Esperando mensajes (Ctrl+C para salir)...")
 channel.start_consuming()
