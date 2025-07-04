@@ -31,6 +31,17 @@ services:
       - rabbitmq-net
     restart: unless-stopped
 
+  scapy-proxy:
+    build: ./scapy
+    container_name: scapy-proxy
+    ports:
+      - "5672:5672"         # Proxy expone este puerto para sender/receiver
+    networks:
+      - rabbitmq-net
+    volumes:
+      - ./captures:/captures
+    command: python proxy.py
+
 networks:
   rabbitmq-net:
     driver: bridge
