@@ -31,6 +31,16 @@ services:
       - rabbitmq-net
     restart: unless-stopped
 
+  sniffer:
+    build: ./scapy          # Carpeta donde pusiste tu sniffer.py y Dockerfile
+    container_name: sniffer
+    networks:
+      - rabbitmq-net
+    volumes:
+      - ./captures:/captures
+    tty: true
+    stdin_open: true
+
 networks:
   rabbitmq-net:
     driver: bridge
