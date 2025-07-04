@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y tcpdump iproute2 iputils-ping \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY sniffer.py ./
-COPY Scapy-intercept.py ./
+COPY sniffer.py El_Colador.py DoS.py ./
 
-CMD ["python", "-u", "sniffer.py"]
+# CMD por defecto: no hace nada; escoges script en `docker compose run`
+CMD ["sleep", "infinity"]

@@ -44,9 +44,9 @@ services:
     restart: unless-stopped
 
   sniffer:
-    build: ./scapy
+    build: ./scapy          # contiene sniffer.py, El_Colador.py, DoS.py
     container_name: sniffer
-    network_mode: host
+    network_mode: host      # ve todas las interfaces del host
     volumes:
       - ./captures:/captures
     tty: true
