@@ -6,4 +6,6 @@ RUN apt-get update && apt-get install -y tcpdump iproute2 iputils-ping \
 
 WORKDIR /app
 COPY sniffer.py ./
-CMD ["python", "-u" ,"sniffer.py"]
+COPY Scapy-intercept.py ./
+
+CMD ["python", "-u", "sniffer.py"]
