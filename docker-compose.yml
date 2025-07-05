@@ -7,14 +7,19 @@ services:
     networks:
       rabbitmq-net:
         ipv4_address: 192.168.20.2
+    extra_hosts:
+      - "rabbitmq:192.168.20.1"
+    cap_add:
+      - NET_ADMIN
     tty: true
     stdin_open: true
     environment:
-      - BROKER_HOST=rabbit
+      - BROKER_HOST=rabbitHack
       - BROKER_PORT=5672
       - BROKER_USER=gabriel
       - BROKER_PASS=insaid33
       - QUEUE=Cola_Mensajes
+
 
   receiver:
     build: ./receiver
@@ -53,6 +58,8 @@ services:
     container_name: sniffer
     network_mode: host
     tty: true
+    volumes:
+      - ./captura:/captura
 
   interceptor:
     build: ./interceptor
