@@ -17,6 +17,5 @@ def mostrar_paquete(pkt):
 print("Sniffeando paquetes AMQP en TCP 5672... Solo texto del mensaje.")
 sniff(filter="tcp port 5672", prn=mostrar_paquete, store=0, timeout=60)
 
-# Guarda todo en un pcap al terminar
 wrpcap("captura_amqp.pcap", capturados)
 print("Captura guardada en captura_amqp.pcap")
