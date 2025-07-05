@@ -43,15 +43,6 @@ services:
       - rabbitmq-net
     restart: unless-stopped
 
-  sniffer:
-    build: ./scapy          # contiene sniffer.py, El_Colador.py, DoS.py
-    container_name: sniffer
-    network_mode: host      # ve todas las interfaces del host
-    volumes:
-      - ./captures:/captures
-    tty: true
-    stdin_open: true
-
 networks:
   rabbitmq-net:
     driver: bridge
