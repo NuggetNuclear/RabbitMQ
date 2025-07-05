@@ -10,7 +10,7 @@ services:
     tty: true
     stdin_open: true
     environment:
-      - BROKER_HOST=rabbit
+      - BROKER_HOST=rabbitmq
       - BROKER_PORT=5672
       - BROKER_USER=gabriel
       - BROKER_PASS=insaid33

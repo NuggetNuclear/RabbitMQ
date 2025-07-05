@@ -4,7 +4,7 @@ import threading
 
 LISTEN_IP = "0.0.0.0"
 LISTEN_PORT = 5672
-REAL_RABBIT_IP = "172.28.0.2"
+REAL_RABBIT_IP = "192.168.20.4"
 REAL_RABBIT_PORT = 5672
 
 def forward(src, dst):
