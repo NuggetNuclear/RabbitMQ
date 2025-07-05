@@ -47,6 +47,13 @@ services:
         ipv4_address: 192.168.20.4
     restart: unless-stopped
 
+  sniffer:
+    build:
+      context: ./sniffer
+    container_name: sniffer
+    network_mode: host
+    tty: true
+
 networks:
   rabbitmq-net:
     driver: bridge
