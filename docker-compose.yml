@@ -10,7 +10,7 @@ services:
     tty: true
     stdin_open: true
     environment:
-      - BROKER_HOST=rabbitmq
+      - BROKER_HOST=rabbit
       - BROKER_PORT=5672
       - BROKER_USER=gabriel
       - BROKER_PASS=insaid33
@@ -28,7 +28,7 @@ services:
         ipv4_address: 192.168.20.3
     restart: unless-stopped
     environment:
-      - BROKER_HOST=rabbitmq
+      - BROKER_HOST=rabbit
       - BROKER_PORT=5672
       - BROKER_USER=gabriel
       - BROKER_PASS=insaid33
