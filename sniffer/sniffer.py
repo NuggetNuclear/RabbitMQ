@@ -1,4 +1,4 @@
-from scapy.all import sniff, TCP, Raw, wrpcap
+from scapy.all import *
 import argparse
 
 parser = argparse.ArgumentParser(description="Sniffer AMQP simple")
@@ -20,6 +20,10 @@ def mostrar_paquete(pkt):
         except Exception:
             pass
         capturados.append(pkt)
+
+print("Interfaces de red disponibles:")
+for iface in get_if_list():
+    print(f"  - {iface}")
 
 print(f"Sniffeando AMQP en TCP 5672, interfaz: {args.iface or 'todas'} ({args.timeout} segundos)")
 sniff(filter="tcp port 5672",
