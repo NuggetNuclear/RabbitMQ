@@ -7,4 +7,4 @@ COPY . .
 
 RUN pip install pika
 
-CMD ["python", "-u", "receiver.py"]
+ENTRYPOINT ["python", "-u", "receiver.py"]
