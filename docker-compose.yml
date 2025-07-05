@@ -10,13 +10,11 @@ services:
     tty: true
     stdin_open: true
     environment:
-      - BROKER_HOST=rabbitmq
+      - BROKER_HOST=rabbit
       - BROKER_PORT=5672
       - BROKER_USER=gabriel
       - BROKER_PASS=insaid33
       - QUEUE=Cola_Mensajes
-    extra_hosts:
-      - "rabbitmq:192.168.20.5"   # <== REDIRECCIÓN a interceptor
 
   receiver:
     build: ./receiver
@@ -48,19 +46,6 @@ services:
       rabbitmq-net:
         ipv4_address: 192.168.20.4
     restart: unless-stopped
-
-  interceptor:
-    build:
-      context: ./interceptor
-    container_name: interceptor
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-    networks:
-      rabbitmq-net:
-        ipv4_address: 192.168.20.5
-    depends_on:
-      - rabbit
 
 networks:
   rabbitmq-net:

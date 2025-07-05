@@ -8,7 +8,7 @@ RABBITMQ_HOST = os.getenv("BROKER_HOST", "rabbitmq")
 RABBITMQ_PORT = int(os.getenv("BROKER_PORT", 5672))
 RABBITMQ_USER = os.getenv("BROKER_USER", "gabriel")
 RABBITMQ_PASS = os.getenv("BROKER_PASS", "insaid33")
-QUEUE        = os.getenv("QUEUE",        "Cola_Mensajes")
+QUEUE = os.getenv("QUEUE", "Cola_Mensajes")
 
 param = pika.ConnectionParameters(
     host=RABBITMQ_HOST,
@@ -32,26 +32,18 @@ chan = conn.channel()
 chan.queue_declare(queue=QUEUE, durable=False)
 print(f"[RECEPTOR] Escuchando en «{QUEUE}»\n")
 
-def cerrar(motivo=""):
-    print(f"\n[FIN] Conexión cerrada: {motivo}", flush=True)
-    try:
-        chan.close()
-        conn.close()
-    finally:
-        sys.exit(0)
-
 def callback(ch, method, props, body):
     txt = body.decode(errors="ignore")
-    if "hackeado" in txt.lower():
-        print("🛑  MENSAJE HACKEADO DETECTADO → cerrando conexión")
-        cerrar("Mensaje hackeado")
-    else:
-        print(f"[MSG] {txt}")
+    print(f"[MSG] {txt}")
 
 chan.basic_consume(queue=QUEUE, on_message_callback=callback, auto_ack=True)
 try:
     chan.start_consuming()
 except KeyboardInterrupt:
-    cerrar("Interrupción usuario")
+    print("\n[FIN] Interrupción usuario", flush=True)
+    chan.close()
+    conn.close()
 except Exception as e:
-    cerrar(str(e))
+    print(f"\n[FIN] Error: {e}", flush=True)
+    chan.close()
+    conn.close()
