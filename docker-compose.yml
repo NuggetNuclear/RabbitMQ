@@ -5,11 +5,12 @@ services:
     depends_on:
       - rabbit
     networks:
-      - rabbitmq-net
+      rabbitmq-net:
+        ipv4_address: 192.168.20.2
     tty: true
     stdin_open: true
     environment:
-      - BROKER_HOST=rabbitmq
+      - BROKER_HOST=rabbit
       - BROKER_PORT=5672
       - BROKER_USER=gabriel
       - BROKER_PASS=insaid33
@@ -21,10 +22,11 @@ services:
     depends_on:
       - rabbit
     networks:
-      - rabbitmq-net
+      rabbitmq-net:
+        ipv4_address: 192.168.20.3
     restart: unless-stopped
     environment:
-      - BROKER_HOST=rabbitmq
+      - BROKER_HOST=rabbit
       - BROKER_PORT=5672
       - BROKER_USER=gabriel
       - BROKER_PASS=insaid33
@@ -32,7 +34,8 @@ services:
 
   rabbit:
     image: rabbitmq:4-management
-    container_name: rabbitmq
+    container_name: rabbit
+    hostname: rabbit
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -40,8 +43,16 @@ services:
       RABBITMQ_DEFAULT_USER: gabriel
       RABBITMQ_DEFAULT_PASS: insaid33
     networks:
-      - rabbitmq-net
+      rabbitmq-net:
+        ipv4_address: 192.168.20.4
     restart: unless-stopped
+
+  sniffer:
+    build:
+      context: ./sniffer
+    container_name: sniffer
+    network_mode: host
+    tty: true
 
 networks:
   rabbitmq-net:

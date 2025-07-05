@@ -1,4 +1,3 @@
-# ./sender/Dockerfile
 FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1
@@ -8,4 +7,4 @@ COPY . .
 
 RUN pip install pika
 
-ENTRYPOINT ["python", "-u", "sender_cli.py"]
+ENTRYPOINT ["python", "-u", "sender.py"]
