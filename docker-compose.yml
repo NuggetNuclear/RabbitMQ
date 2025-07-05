@@ -54,6 +54,15 @@ services:
     network_mode: host
     tty: true
 
+  interceptor:
+    build: ./interceptor
+    container_name: interceptor
+    network_mode: host     # acceso directo a 0.0.0.0:5672
+    privileged: true       # para iptables/NFQUEUE
+    tty: true
+    restart: unless-stopped
+
+
 networks:
   rabbitmq-net:
     driver: bridge
